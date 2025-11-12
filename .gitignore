@@ -1,1 +1,3 @@
 models/perspective.py
+__pycache__/
+*.pyc
