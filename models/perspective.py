@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 
-API_KEY = "AIzaSyBB7A7NthFxd3Q8czAzZNh6bUCD58bkJeo"
+API_KEY = ""
 URL = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze"
 
 def evaluate_perspective(texts):
