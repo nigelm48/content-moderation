@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 
-API_KEY = "AIzaSyBB7A7NthFxd3Q8czAzZNh6bUCD58bkJeo"
+API_KEY = ""
 URL = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze"
 
 def evaluate_perspective(texts):
@@ -16,3 +16,8 @@ def evaluate_perspective(texts):
         score = response['attributeScores']['TOXICITY']['summaryScore']['value']
         scores.append(score)
     return pd.DataFrame({"toxicity": scores})
+
+if __name__ == "__main__":
+    sample_texts = ["I hate you", "Have a nice day!"]
+    scores = evaluate_perspective(sample_texts)
+    print(scores)
