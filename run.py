@@ -57,16 +57,36 @@ def main():
         print("Applying normalisation mitigation (Perspective, human)...")
         persp_human_norm = evaluate_perspective(mitigated_human_texts)
 
+        print("Applying detection + fallback mitigation (Perspective, human)...")
+        persp_human_fallback = detect_and_fallback(
+            texts_human,
+            fallback_fn=evaluate_perspective
+        )
+
         print("Applying normalisation mitigation (Perspective, auto)...")
         persp_auto_norm = evaluate_perspective(mitigated_auto_texts)
+
+        print("Applying detection + fallback mitigation (Perspective, auto)...")
+        persp_auto_fallback = detect_and_fallback(
+            auto_texts,
+            fallback_fn=evaluate_perspective
+        )
+
 
         print("\nComparing Perspective API results...")
         persp_results = {
             "perspective_human_drop": compare_toxicity_scores(persp_clean, persp_human),
             "perspective_auto_drop": compare_toxicity_scores(persp_clean, persp_auto),
+
+            # Normalisation mitigation
             "perspective_human_norm": compare_toxicity_scores(persp_clean, persp_human_norm),
             "perspective_auto_norm": compare_toxicity_scores(persp_clean, persp_auto_norm),
+
+            # Detection + fallback mitigation
+            "perspective_human_fallback": compare_toxicity_scores(persp_clean, persp_human_fallback),
+            "perspective_auto_fallback": compare_toxicity_scores(persp_clean, persp_auto_fallback),
         }
+
     except Exception as e:
         print(f"\n⚠️ Skipping Perspective API analysis due to error: {e}")
         persp_results = {}
