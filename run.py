@@ -20,6 +20,14 @@ def main():
     print("Evaluating Detoxify on clean texts...")
     clean_scores = evaluate_toxicity(texts_clean)
 
+    print("Applying normalisation mitigation (clean)...")
+    mitigated_clean_texts = [normalise_text(t) for t in texts_clean]
+    mitigated_clean_scores = evaluate_toxicity(mitigated_clean_texts)
+
+    print("Applying detection + fallback mitigation (clean)...")
+    fallback_clean_scores = detect_and_fallback(texts_clean, fallback_fn=evaluate_toxicity)
+
+
     print("Evaluating Detoxify on human perturbed texts...")
     human_scores = evaluate_toxicity(texts_human)
 
@@ -47,6 +55,15 @@ def main():
     try:
         print("\nEvaluating Perspective API on clean texts...")
         persp_clean = evaluate_perspective(texts_clean)
+
+        print("Applying normalisation mitigation (Perspective, clean)...")
+        persp_clean_norm = evaluate_perspective(mitigated_clean_texts)
+
+        print("Applying detection + fallback mitigation (Perspective, clean)...")
+        persp_clean_fallback = evaluate_perspective(
+            detect_and_fallback(texts_clean, fallback_fn=lambda x: x)
+        )
+
 
         print("Evaluating Perspective API on human perturbed texts...")
         persp_human = evaluate_perspective(texts_human)
@@ -78,6 +95,10 @@ def main():
             "perspective_human_drop": compare_toxicity_scores(persp_clean, persp_human),
             "perspective_auto_drop": compare_toxicity_scores(persp_clean, persp_auto),
 
+            # Perspective clean mitigations
+            "perspective_clean_norm": compare_toxicity_scores(persp_clean, persp_clean_norm),
+            "perspective_clean_fallback": compare_toxicity_scores(persp_clean, persp_clean_fallback),
+
             # Normalisation mitigation
             "perspective_human_norm": compare_toxicity_scores(persp_clean, persp_human_norm),
             "perspective_auto_norm": compare_toxicity_scores(persp_clean, persp_auto_norm),
@@ -97,6 +118,9 @@ def main():
         # Detoxify baselines
         "human_drop": compare_toxicity_scores(clean_scores, human_scores),
         "auto_drop": compare_toxicity_scores(clean_scores, auto_scores),
+        # Detoxify clean mitigations
+        "clean_norm": compare_toxicity_scores(clean_scores, mitigated_clean_scores),
+        "clean_fallback": compare_toxicity_scores(clean_scores, fallback_clean_scores),
         # Detoxify mitigations
         "mitigated_human": compare_toxicity_scores(clean_scores, mitigated_human_scores),
         "fallback_human": compare_toxicity_scores(clean_scores, fallback_human_scores),
