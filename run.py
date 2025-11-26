@@ -4,8 +4,8 @@ from models.detoxify import evaluate_toxicity
 from mitigations.normalisation import normalise_text
 from mitigations.detection_fallback import detect_and_fallback
 from evaluation.results import compare_toxicity_scores
-from evaluation.visualisation import plot_comparison
-from models.perspective import evaluate_perspective  # ✅ added
+from evaluation.visualisation import plot_comparison, plot_scatter, plot_box
+from models.perspective import evaluate_perspective
 import pandas as pd
 
 def main():
@@ -25,8 +25,8 @@ def main():
     mitigated_clean_scores = evaluate_toxicity(mitigated_clean_texts)
 
     print("Applying detection + fallback mitigation (clean)...")
-    fallback_clean_scores = detect_and_fallback(texts_clean, fallback_fn=evaluate_toxicity)
-
+    fallback_clean_texts = detect_and_fallback(texts_clean, fallback_fn=lambda x: x)
+    fallback_clean_scores = evaluate_toxicity(fallback_clean_texts)
 
     print("Evaluating Detoxify on human perturbed texts...")
     human_scores = evaluate_toxicity(texts_human)
@@ -42,14 +42,16 @@ def main():
     mitigated_human_scores = evaluate_toxicity(mitigated_human_texts)
 
     print("Applying detection + fallback mitigation (human)...")
-    fallback_human_scores = detect_and_fallback(texts_human, fallback_fn=evaluate_toxicity)
+    fallback_human_texts = detect_and_fallback(texts_human, fallback_fn=lambda x: x)
+    fallback_human_scores = evaluate_toxicity(fallback_human_texts)
 
     print("Applying normalisation mitigation (automated)...")
     mitigated_auto_texts = [normalise_text(t) for t in auto_texts]
     mitigated_auto_scores = evaluate_toxicity(mitigated_auto_texts)
 
     print("Applying detection + fallback mitigation (automated)...")
-    fallback_auto_scores = detect_and_fallback(auto_texts, fallback_fn=evaluate_toxicity)
+    fallback_auto_texts = detect_and_fallback(auto_texts, fallback_fn=lambda x: x)
+    fallback_auto_scores = evaluate_toxicity(fallback_auto_texts)
 
     # === Step 3: Perspective API ===
     try:
@@ -60,51 +62,34 @@ def main():
         persp_clean_norm = evaluate_perspective(mitigated_clean_texts)
 
         print("Applying detection + fallback mitigation (Perspective, clean)...")
-        persp_clean_fallback = evaluate_perspective(
-            detect_and_fallback(texts_clean, fallback_fn=lambda x: x)
-        )
-
+        persp_clean_fallback = evaluate_perspective(fallback_clean_texts)
 
         print("Evaluating Perspective API on human perturbed texts...")
         persp_human = evaluate_perspective(texts_human)
-
-        print("Evaluating Perspective API on automated perturbed texts...")
-        persp_auto = evaluate_perspective(auto_texts)
 
         print("Applying normalisation mitigation (Perspective, human)...")
         persp_human_norm = evaluate_perspective(mitigated_human_texts)
 
         print("Applying detection + fallback mitigation (Perspective, human)...")
-        persp_human_fallback = detect_and_fallback(
-            texts_human,
-            fallback_fn=evaluate_perspective
-        )
+        persp_human_fallback = evaluate_perspective(fallback_human_texts)
+
+        print("Evaluating Perspective API on automated perturbed texts...")
+        persp_auto = evaluate_perspective(auto_texts)
 
         print("Applying normalisation mitigation (Perspective, auto)...")
         persp_auto_norm = evaluate_perspective(mitigated_auto_texts)
 
         print("Applying detection + fallback mitigation (Perspective, auto)...")
-        persp_auto_fallback = detect_and_fallback(
-            auto_texts,
-            fallback_fn=evaluate_perspective
-        )
+        persp_auto_fallback = evaluate_perspective(fallback_auto_texts)
 
-
-        print("\nComparing Perspective API results...")
         persp_results = {
-            "perspective_human_drop": compare_toxicity_scores(persp_clean, persp_human),
-            "perspective_auto_drop": compare_toxicity_scores(persp_clean, persp_auto),
-
-            # Perspective clean mitigations
             "perspective_clean_norm": compare_toxicity_scores(persp_clean, persp_clean_norm),
             "perspective_clean_fallback": compare_toxicity_scores(persp_clean, persp_clean_fallback),
-
-            # Normalisation mitigation
+            "perspective_human_drop": compare_toxicity_scores(persp_clean, persp_human),
             "perspective_human_norm": compare_toxicity_scores(persp_clean, persp_human_norm),
-            "perspective_auto_norm": compare_toxicity_scores(persp_clean, persp_auto_norm),
-
-            # Detection + fallback mitigation
             "perspective_human_fallback": compare_toxicity_scores(persp_clean, persp_human_fallback),
+            "perspective_auto_drop": compare_toxicity_scores(persp_clean, persp_auto),
+            "perspective_auto_norm": compare_toxicity_scores(persp_clean, persp_auto_norm),
             "perspective_auto_fallback": compare_toxicity_scores(persp_clean, persp_auto_fallback),
         }
 
@@ -115,27 +100,46 @@ def main():
     # === Step 4: Combine results ===
     print("\nComparing Detoxify results...")
     result_summary = {
-        # Detoxify baselines
         "human_drop": compare_toxicity_scores(clean_scores, human_scores),
         "auto_drop": compare_toxicity_scores(clean_scores, auto_scores),
-        # Detoxify clean mitigations
         "clean_norm": compare_toxicity_scores(clean_scores, mitigated_clean_scores),
         "clean_fallback": compare_toxicity_scores(clean_scores, fallback_clean_scores),
-        # Detoxify mitigations
         "mitigated_human": compare_toxicity_scores(clean_scores, mitigated_human_scores),
         "fallback_human": compare_toxicity_scores(clean_scores, fallback_human_scores),
         "mitigated_auto": compare_toxicity_scores(clean_scores, mitigated_auto_scores),
         "fallback_auto": compare_toxicity_scores(clean_scores, fallback_auto_scores),
-        # Merge Perspective results
         **persp_results
     }
 
+    # === Step 5: Print results ===
     for k, v in result_summary.items():
         print(f"\n{k}:\n{v}")
 
-    # === Step 5: Visualise ===
-    print("\nGenerating visualisations...")
-    plot_comparison(result_summary)
+    # === Step 6: Visualisations ===
+    print("\nGenerating bar plot...")
+    plot_comparison(result_summary, metric="mean_drop", save_path="results_bar.png")
+
+    print("Generating scatter plot...")
+    # For scatter, just comparing human vs auto drops as an example
+    plot_scatter(
+        results_dict_x=result_summary,
+        results_dict_y=result_summary,
+        metric="mean_drop",
+        save_path="results_scatter.png"
+    )
+
+    print("Generating box plot...")
+    # Box plot requires raw scores
+    raw_scores_dict = {
+        "clean": clean_scores,
+        "human": human_scores,
+        "auto": auto_scores,
+        "mitigated_human": mitigated_human_scores,
+        "fallback_human": fallback_human_scores,
+        "mitigated_auto": mitigated_auto_scores,
+        "fallback_auto": fallback_auto_scores
+    }
+    plot_box(raw_scores_dict, metric="toxicity", save_path="results_box.png")
 
     print("\n✅ Experiment complete.")
 
