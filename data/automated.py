@@ -20,9 +20,9 @@ def random_char_noise(text):
         return text
     i = random.randint(0, len(text) - 1)
     ops = [
-        text[:i] + text[i]*2 + text[i+1:],               # duplication
-        text[:i] + "" + text[i+1:],                      # deletion
-        text[:i] + random.choice("!?.*") + text[i:],     # insertion
+        text[:i] + text[i]*2 + text[i+1:],             # duplication
+        text[:i] + "" + text[i+1:],                    # deletion
+        text[:i] + random.choice("!?.*") + text[i:],   # insertion
     ]
     return random.choice(ops)
 
@@ -78,7 +78,7 @@ def automated_perturbation(texts, num_examples=50):
         try:
             out = attack(t)
         except Exception:
-            out = t  # fallback if attack breaks
+            out = t  # if there's an error, do nothing
 
         perturbed.append(out)
 
