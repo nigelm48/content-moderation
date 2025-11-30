@@ -16,7 +16,7 @@ def main():
     clean_texts = df["clean_version"].head(100).tolist()
     human_texts = df["perturbed_version"].head(100).tolist()
 
-    # Step 1: Baseline (Detoxify)
+    # Baseline (Detoxify)
     print("Evaluating Detoxify on clean texts...")
     clean_scores = evaluate_toxicity(clean_texts)
 
@@ -36,7 +36,7 @@ def main():
     auto_texts = [str(t) if t is not None else "" for t in auto_texts]
     auto_scores = evaluate_toxicity(auto_texts)
 
-    # Step 2: Mitigation strategies (Detoxify)
+    # Mitigation strategies (Detoxify)
     print("Applying normalisation mitigation (human)...")
     mitigated_human_texts = [normalise_text(t) for t in human_texts]
     mitigated_human_scores = evaluate_toxicity(mitigated_human_texts)
@@ -53,7 +53,7 @@ def main():
     fallback_auto_texts = detect_and_fallback(auto_texts, fallback_fn=lambda x: x)
     fallback_auto_scores = evaluate_toxicity(fallback_auto_texts)
 
-    # Step 3: Perspective API
+    # Perspective API
     try:
         print("\nEvaluating Perspective API on clean texts...")
         persp_clean = evaluate_perspective(clean_texts)
@@ -97,7 +97,7 @@ def main():
         print(f"\n⚠️ Skipping Perspective API analysis due to error: {e}")
         persp_results = {}
 
-    # Step 4: Combine results
+    # Combine results
     print("\nComparing Detoxify results...")
     result_summary = {
         "human_drop": compare_toxicity_scores(clean_scores, human_scores),
@@ -111,11 +111,11 @@ def main():
         **persp_results
     }
 
-    # Step 5: Print results
+    # Print results
     for k, v in result_summary.items():
         print(f"\n{k}:\n{v}")
 
-    # Step 6: Visualisations
+    # Visualisations
     print("\nGenerating bar plot...")
     plot_comparison(result_summary, metric="mean_drop", save_path="results_bar.png")
 
