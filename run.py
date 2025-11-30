@@ -1,6 +1,6 @@
 from data.noisyhate import load_noisyhate
 from data.automated import automated_perturbation
-from models.detoxify import evaluate_toxicity
+from models.detoxify_model import evaluate_toxicity
 from mitigations.normalisation import normalise_text
 from mitigations.detection_fallback import detect_and_fallback
 from evaluation.results import compare_toxicity_scores
