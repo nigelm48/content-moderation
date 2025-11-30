@@ -63,7 +63,7 @@ def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=Fal
     first_pass_texts = []
     obfusc_scores = []
 
-    # Step 1: compute both soft and strong normalisation
+    # Compute both soft and strong normalisation
     for text in texts:
         if not isinstance(text, str):
             text = str(text) if text is not None else ""
@@ -82,7 +82,7 @@ def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=Fal
 
         first_pass_texts.append(strong)
 
-    # Step 2: attempt to get preliminary model confidence
+    # Attempt to get preliminary model confidence
     prelim_scores = []
     fallback_output = fallback_fn(first_pass_texts)
 
@@ -99,7 +99,7 @@ def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=Fal
     else:
         prelim_scores = [0] * len(first_pass_texts)
 
-    # Step 3: dynamic fallback logic
+    # Fallback logic
     final_inputs = []
     for original, norm, score, conf in zip(texts, first_pass_texts, obfusc_scores, prelim_scores):
         dynamic_threshold = threshold
@@ -114,5 +114,5 @@ def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=Fal
         else:
             final_inputs.append(norm)  # could also choose original
 
-    # Step 4: final evaluation
+    # Final evaluation
     return fallback_fn(final_inputs)

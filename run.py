@@ -13,36 +13,36 @@ def main():
     df = load_noisyhate()
 
     # Take a subset for faster testing
-    texts_clean = df["clean_version"].head(100).tolist()
-    texts_human = df["perturbed_version"].head(100).tolist()
+    clean_texts = df["clean_version"].head(100).tolist()
+    human_texts = df["perturbed_version"].head(100).tolist()
 
-    # === Step 1: Baseline (Detoxify) ===
+    # Step 1: Baseline (Detoxify)
     print("Evaluating Detoxify on clean texts...")
-    clean_scores = evaluate_toxicity(texts_clean)
+    clean_scores = evaluate_toxicity(clean_texts)
 
     print("Applying normalisation mitigation (clean)...")
-    mitigated_clean_texts = [normalise_text(t) for t in texts_clean]
+    mitigated_clean_texts = [normalise_text(t) for t in clean_texts]
     mitigated_clean_scores = evaluate_toxicity(mitigated_clean_texts)
 
     print("Applying detection + fallback mitigation (clean)...")
-    fallback_clean_texts = detect_and_fallback(texts_clean, fallback_fn=lambda x: x)
+    fallback_clean_texts = detect_and_fallback(clean_texts, fallback_fn=lambda x: x)
     fallback_clean_scores = evaluate_toxicity(fallback_clean_texts)
 
     print("Evaluating Detoxify on human perturbed texts...")
-    human_scores = evaluate_toxicity(texts_human)
+    human_scores = evaluate_toxicity(human_texts)
 
     print("Generating automated perturbations...")
-    auto_texts = automated_perturbation(texts_clean, num_examples=100)
+    auto_texts = automated_perturbation(clean_texts, num_examples=100)
     auto_texts = [str(t) if t is not None else "" for t in auto_texts]
     auto_scores = evaluate_toxicity(auto_texts)
 
-    # === Step 2: Mitigation strategies (Detoxify) ===
+    # Step 2: Mitigation strategies (Detoxify)
     print("Applying normalisation mitigation (human)...")
-    mitigated_human_texts = [normalise_text(t) for t in texts_human]
+    mitigated_human_texts = [normalise_text(t) for t in human_texts]
     mitigated_human_scores = evaluate_toxicity(mitigated_human_texts)
 
     print("Applying detection + fallback mitigation (human)...")
-    fallback_human_texts = detect_and_fallback(texts_human, fallback_fn=lambda x: x)
+    fallback_human_texts = detect_and_fallback(human_texts, fallback_fn=lambda x: x)
     fallback_human_scores = evaluate_toxicity(fallback_human_texts)
 
     print("Applying normalisation mitigation (automated)...")
@@ -53,10 +53,10 @@ def main():
     fallback_auto_texts = detect_and_fallback(auto_texts, fallback_fn=lambda x: x)
     fallback_auto_scores = evaluate_toxicity(fallback_auto_texts)
 
-    # === Step 3: Perspective API ===
+    # Step 3: Perspective API
     try:
         print("\nEvaluating Perspective API on clean texts...")
-        persp_clean = evaluate_perspective(texts_clean)
+        persp_clean = evaluate_perspective(clean_texts)
 
         print("Applying normalisation mitigation (Perspective, clean)...")
         persp_clean_norm = evaluate_perspective(mitigated_clean_texts)
@@ -65,7 +65,7 @@ def main():
         persp_clean_fallback = evaluate_perspective(fallback_clean_texts)
 
         print("Evaluating Perspective API on human perturbed texts...")
-        persp_human = evaluate_perspective(texts_human)
+        persp_human = evaluate_perspective(human_texts)
 
         print("Applying normalisation mitigation (Perspective, human)...")
         persp_human_norm = evaluate_perspective(mitigated_human_texts)
@@ -97,7 +97,7 @@ def main():
         print(f"\n⚠️ Skipping Perspective API analysis due to error: {e}")
         persp_results = {}
 
-    # === Step 4: Combine results ===
+    # Step 4: Combine results
     print("\nComparing Detoxify results...")
     result_summary = {
         "human_drop": compare_toxicity_scores(clean_scores, human_scores),
@@ -111,11 +111,11 @@ def main():
         **persp_results
     }
 
-    # === Step 5: Print results ===
+    # Step 5: Print results
     for k, v in result_summary.items():
         print(f"\n{k}:\n{v}")
 
-    # === Step 6: Visualisations ===
+    # Step 6: Visualisations
     print("\nGenerating bar plot...")
     plot_comparison(result_summary, metric="mean_drop", save_path="results_bar.png")
 
