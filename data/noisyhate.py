@@ -26,7 +26,7 @@ def load_noisyhate():
         print("Loaded clean and perturbed splits successfully.")
         return df
 
-    # Otherwise, fallback to single-split mode (e.g., 'train')
+    # Otherwise, fallback to single-split mode
     else:
         split_name = list(dataset.keys())[0]  # pick the first available split
         df = pd.DataFrame(dataset[split_name])
