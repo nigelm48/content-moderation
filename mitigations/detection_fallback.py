@@ -1,7 +1,7 @@
 import re
 import numpy as np
 from textblob import TextBlob
-from mitigations.normalisation import normalise_text  # existing stronger normaliser
+from mitigations.normalisation import normalise_text
 
 LEETSPEAK_MAP = {
     "0": "o", "1": "i", "3": "e", "4": "a",
@@ -9,7 +9,7 @@ LEETSPEAK_MAP = {
 }
 
 def obfuscation_score(text):
-    """Quantify obfuscation using character anomalies + structure."""
+    """Quantifying obfuscation using character or structure anomalies"""
     if not text:
         return 0
 
@@ -41,7 +41,7 @@ def obfuscation_score(text):
 
 
 def soft_normalise(text):
-    """Light reversible cleaning."""
+    """Basic normalisation to handle common obfuscations"""
     t = text.lower()
     for k, v in LEETSPEAK_MAP.items():
         t = t.replace(k, v)
@@ -51,7 +51,6 @@ def soft_normalise(text):
 
 def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=False):
     """
-    Full detection+fallback algorithm:
     1. soft-normalise
     2. full normalisation
     3. dynamic fallback triggering based on:
