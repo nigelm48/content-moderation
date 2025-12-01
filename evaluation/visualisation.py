@@ -4,7 +4,7 @@ import seaborn as sns
 
 def plot_bar(results_dict, metric="mean_drop", save_path="results_bar.png"):
     """
-    Simple bar plot of mean drop by condition.
+    Bar chart showing mean drop in toxicity scores across different conditions.
     """
     labels, means = [], []
     for name, df in results_dict.items():
@@ -31,7 +31,6 @@ def plot_bar(results_dict, metric="mean_drop", save_path="results_bar.png"):
 def plot_box(results_dict, metric="drop_values", save_path="results_box.png"):
     """
     Boxplot showing distribution of drops.
-    Expects each DataFrame to have a column of per-sample drops.
     """
     all_data = []
     for name, df in results_dict.items():
@@ -55,7 +54,7 @@ def plot_box(results_dict, metric="drop_values", save_path="results_box.png"):
 
 def plot_scatter(results_dict_x, results_dict_y, metric="mean_drop", save_path="results_scatter.png"):
     """
-    Scatter plot comparing two sets of results (e.g., human vs auto).
+    Scatter plot to compare perspective api vs detoxify.
     """
     x_vals, y_vals, labels = [], [], []
     for name in results_dict_x:
@@ -77,9 +76,31 @@ def plot_scatter(results_dict_x, results_dict_y, metric="mean_drop", save_path="
     plt.show()
 
 
-def plot_comparison(results_dict, metric="mean_drop", save_path="results_plot.png"):
-    """
-    Default function to call all visualisations.
-    """
-    plot_bar(results_dict, metric, save_path.replace(".png", "_bar.png"))
-    plot_box(results_dict, metric="drop_values", save_path=save_path.replace(".png", "_box.png"))
+
+def plot_label_changes(results_dict, save_path="label_changes.png"):
+
+    rows = []
+    for name, df in results_dict.items():
+        rows.append({
+            "scenario": name,
+            "normal_to_toxic_rate": df["normal_to_toxic_rate"].iloc[0],
+            "toxic_to_normal_rate": df["toxic_to_normal_rate"].iloc[0],
+        })
+
+    plot_df = pd.DataFrame(rows)
+
+    plt.figure(figsize=(12, 6))
+    x = range(len(plot_df))
+
+    plt.bar([i - 0.2 for i in x], plot_df["normal_to_toxic_rate"], width=0.4, label="Normal → Toxic")
+    plt.bar([i + 0.2 for i in x], plot_df["toxic_to_normal_rate"], width=0.4, label="Toxic → Normal")
+
+    plt.xticks(x, plot_df["scenario"], rotation=45, ha="right")
+    plt.ylabel("Rate")
+    plt.title("HateXplain Label Change rates")
+    plt.legend()
+    plt.tight_layout()
+
+    plt.savefig(save_path)
+    plt.show()
+    

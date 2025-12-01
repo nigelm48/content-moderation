@@ -1,10 +1,12 @@
 from data.noisyhate import load_noisyhate
 from data.automated import automated_perturbation
 from models.detoxify_model import evaluate_toxicity
+from models.hatexplain import hatexplain
 from mitigations.normalisation import normalise_text
 from mitigations.detection_fallback import detect_and_fallback
 from evaluation.results import compare_toxicity_scores
-from evaluation.visualisation import plot_comparison, plot_scatter, plot_box
+from evaluation.label_changes import evaluate_label_changes
+from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes
 from models.perspective import evaluate_perspective
 import pandas as pd
 
@@ -52,6 +54,42 @@ def main():
     print("Applying detection + fallback mitigation (automated)...")
     fallback_auto_texts = detect_and_fallback(auto_texts, fallback_fn=lambda x: x)
     fallback_auto_scores = evaluate_toxicity(fallback_auto_texts)
+
+    # HateXplain
+    print("\nRunning HateXplain on clean texts...")
+    hx_clean = hatexplain(clean_texts)
+
+    print("Running HateXplain on human-perturbed texts...")
+    hx_human = hatexplain(human_texts)
+
+    hx_human_label_stats = evaluate_label_changes(hx_clean, hx_human)
+
+    print("Running HateXplain on automated perturbations...")
+    hx_auto = hatexplain(auto_texts)
+
+    hx_auto_label_stats = evaluate_label_changes(hx_clean, hx_auto)
+
+    hx_human_norm = hatexplain(norm_human_texts)
+    hx_human_fallback = hatexplain(fallback_human_texts)
+
+    hx_human_norm_label_stats = evaluate_label_changes(hx_clean, hx_human_norm)
+    hx_human_fallback_label_stats = evaluate_label_changes(hx_clean, hx_human_fallback)
+
+    hx_auto_norm = hatexplain(norm_auto_texts)
+    hx_auto_fallback = hatexplain(fallback_auto_texts)
+
+    hx_auto_norm_label_stats = evaluate_label_changes(hx_clean, hx_auto_norm)
+    hx_auto_fallback_label_stats = evaluate_label_changes(hx_clean, hx_auto_fallback)
+
+    hx_results = {
+    "human": hx_human_label_stats,
+    "auto": hx_auto_label_stats,
+    "human_norm": hx_human_norm_label_stats,
+    "human_fallback": hx_human_fallback_label_stats,
+    "auto_norm": hx_auto_norm_label_stats,
+    "auto_fallback": hx_auto_fallback_label_stats,
+    }
+
 
     # Perspective API
     try:
@@ -116,13 +154,16 @@ def main():
         print(f"\n{k}:\n{v}")
 
     # Visualisations
-    print("\nGenerating bar chart...")
-    plot_comparison(result_summary, metric="mean_drop", save_path="results_bar.png")
+    print("\nGenerating bar chart for toxicity...")
+    plot_bar(result_summary, metric="mean_drop", save_path="results_bar.png")
+
+    print("\nGenerating label-change bar chart...")
+    plot_label_changes(hx_results, save_path="HX_label_changes.png")
 
     print("Generating scatter graph...")
     plot_scatter(
         results_dict_x=result_summary,
-        results_dict_y=result_summary,
+        results_dict_y=persp_results,
         metric="mean_drop",
         save_path="results_scatter.png"
     )
