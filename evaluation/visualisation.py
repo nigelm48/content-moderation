@@ -104,3 +104,17 @@ def plot_label_changes(results_dict, save_path="label_changes.png"):
     plt.savefig(save_path)
     plt.show()
     
+def plot_similarity_distributions(human_df, auto_df, save_path="similarity_boxplot.png"):
+    human_df["type"] = "human"
+    auto_df["type"] = "automated"
+
+    df = pd.concat([human_df, auto_df])
+
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df, x="type", y="similarity")
+    plt.title("Semantic Similarity: Human vs Automated Perturbations")
+    plt.ylabel("Cosine Similarity")
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.show()
+

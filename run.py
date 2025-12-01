@@ -6,7 +6,8 @@ from mitigations.normalisation import normalise_text
 from mitigations.detection_fallback import detect_and_fallback
 from evaluation.results import compare_toxicity_scores
 from evaluation.label_changes import evaluate_label_changes
-from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes
+from evaluation.similarities import compare_similarity
+from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes, plot_similarity_distributions
 from models.perspective import evaluate_perspective
 import pandas as pd
 
@@ -180,6 +181,12 @@ def main():
         "fallback_auto": fallback_auto_scores
     }
     plot_box(raw_scores, metric="toxicity", save_path="results_box.png")
+
+    # Testing semantic similarity
+    human_df, auto_df, summary = compare_similarity(clean_texts, human_texts, auto_texts)
+    print("\nSemantic similarity results:")
+    print(summary)
+    plot_similarity_distributions(human_df, auto_df, save_path="semantic_similarity_boxplot.png")
 
     print("\n✅ Experiment complete.")
 
