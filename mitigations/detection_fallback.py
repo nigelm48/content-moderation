@@ -1,7 +1,7 @@
 import re
 import numpy as np
 from textblob import TextBlob
-from mitigations.normalisation import normalise_text
+
 
 LEETSPEAK_MAP = {
     "0": "o", "1": "i", "3": "e", "4": "a",
@@ -49,20 +49,15 @@ def soft_normalise(text):
     return t
 
 
-def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=False):
+def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=True):
     """
-    1. soft-normalise
-    2. full normalisation
-    3. dynamic fallback triggering based on:
-         - obfuscation score
-         - text length
-         - optional fallback model confidence
+    1. soft-normalise (handle leetspeak, punctuation)
+    2. optionally apply spell correction
+    3. dynamic fallback based on obfuscation score
     """
-
     first_pass_texts = []
     obfusc_scores = []
 
-    # Compute both soft and strong normalisation
     for text in texts:
         if not isinstance(text, str):
             text = str(text) if text is not None else ""
@@ -70,48 +65,28 @@ def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=Fal
         score = obfuscation_score(text)
         obfusc_scores.append(score)
 
-        soft = soft_normalise(text)
-        strong = normalise_text(soft)
+        norm_text = soft_normalise(text)
 
+        # only apply spell correction if obfuscation score is high
         if correct_spelling and score > threshold:
             try:
-                strong = str(TextBlob(strong).correct())
+                norm_text = str(TextBlob(norm_text).correct())
             except:
                 pass
 
-        first_pass_texts.append(strong)
+        first_pass_texts.append(norm_text)
 
-    # Attempt to get preliminary model confidence
-    prelim_scores = []
-    fallback_output = fallback_fn(first_pass_texts)
-
-    # Handle different return types
-    if isinstance(fallback_output, list):
-        # fallback_fn returned raw scores or text: use 0 as placeholder
-        prelim_scores = [0] * len(fallback_output)
-    elif hasattr(fallback_output, "get") and "toxicity" in fallback_output:
-        # fallback_fn returned a dict
-        prelim_scores = fallback_output.get("toxicity", [0]*len(first_pass_texts))
-    elif hasattr(fallback_output, "columns") and "toxicity" in fallback_output.columns:
-        # fallback_fn returned DataFrame
-        prelim_scores = fallback_output["toxicity"].fillna(0).tolist()
-    else:
-        prelim_scores = [0] * len(first_pass_texts)
-
-    # Fallback logic
     final_inputs = []
-    for original, norm, score, conf in zip(texts, first_pass_texts, obfusc_scores, prelim_scores):
+    for original, norm, score in zip(texts, first_pass_texts, obfusc_scores):
         dynamic_threshold = threshold
         if len(original) < 6:
             dynamic_threshold *= 0.7
         if len(original) > 50:
             dynamic_threshold *= 1.3
 
-        # fallback if high obfuscation & low confidence
-        if score > dynamic_threshold and conf < 0.30:
+        if score > dynamic_threshold:
             final_inputs.append(norm)
         else:
-            final_inputs.append(norm)  # could also choose original
+            final_inputs.append(original)
 
-    # Final evaluation
     return fallback_fn(final_inputs)

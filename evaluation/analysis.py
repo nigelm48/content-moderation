@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer, util
 import pandas as pd
+from lexical_diversity import lex_div as ld
 
 model = SentenceTransformer("all-mpnet-base-v2")
 
@@ -40,3 +41,4 @@ def compare_similarity(clean, human, auto):
     })
 
     return human_df, auto_df, summary
+

@@ -15,7 +15,6 @@ LEET_MAP = {
 
 
 def random_char_noise(text):
-    """Simple char-level perturbation."""
     if len(text) < 2:
         return text
     i = random.randint(0, len(text) - 1)
@@ -51,6 +50,16 @@ def punctuation_injection(text):
     punct = ["*", "-", "~", ".", "!", "…"]
     return "".join(c + (random.choice(punct) if random.random() < 0.1 else "") for c in text)
 
+def synonym_substitution(text):
+    augmenter = WordNetAugmenter()
+    try:
+        augmented = augmenter.augment(text)
+        if augmented:
+            return augmented[0]
+    except Exception:
+        return text
+    return text
+
 
 def automated_perturbation(texts, num_examples=50):
     """
@@ -60,6 +69,7 @@ def automated_perturbation(texts, num_examples=50):
 
     attacks = [
         lambda x: augmenter.augment(x)[0],
+        synonym_substitution,
         random_char_noise,
         homoglyph_attack,
         leetspeak,

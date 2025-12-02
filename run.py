@@ -6,7 +6,7 @@ from mitigations.normalisation import normalise_text
 from mitigations.detection_fallback import detect_and_fallback
 from evaluation.results import compare_toxicity_scores
 from evaluation.label_changes import evaluate_label_changes
-from evaluation.similarities import compare_similarity
+from evaluation.analysis import compare_similarity
 from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes, plot_similarity_distributions
 from models.perspective import evaluate_perspective
 import pandas as pd
@@ -15,7 +15,7 @@ def main():
     print("Loading data...")
     df = load_noisyhate()
 
-    # Take a subset for faster testing
+
     clean_texts = df["clean_version"].head(100).tolist()
     human_texts = df["perturbed_version"].head(100).tolist()
 
@@ -35,7 +35,7 @@ def main():
     human_scores = evaluate_toxicity(human_texts)
 
     print("Generating automated perturbations...")
-    auto_texts = automated_perturbation(clean_texts, num_examples=100)
+    auto_texts = automated_perturbation(clean_texts, num_examples=len(clean_texts))
     auto_texts = [str(t) if t is not None else "" for t in auto_texts]
     auto_scores = evaluate_toxicity(auto_texts)
 
@@ -91,50 +91,52 @@ def main():
     "auto_fallback": hx_auto_fallback_label_stats,
     }
 
-
     # Perspective API
-    try:
-        print("\nEvaluating Perspective API on clean texts...")
-        persp_clean = evaluate_perspective(clean_texts)
+    PERSPECTIVE = True
 
-        print("Applying normalisation mitigation (Perspective, clean)...")
-        persp_clean_norm = evaluate_perspective(norm_clean_texts)
+    if PERSPECTIVE:
+        try:
+            print("\nEvaluating Perspective API on clean texts...")
+            persp_clean = evaluate_perspective(clean_texts)
 
-        print("Applying detection + fallback mitigation (Perspective, clean)...")
-        persp_clean_fallback = evaluate_perspective(fallback_clean_texts)
+            print("Applying normalisation mitigation (Perspective, clean)...")
+            persp_clean_norm = evaluate_perspective(norm_clean_texts)
 
-        print("Evaluating Perspective API on human perturbed texts...")
-        persp_human = evaluate_perspective(human_texts)
+            print("Applying detection + fallback mitigation (Perspective, clean)...")
+            persp_clean_fallback = evaluate_perspective(fallback_clean_texts)
 
-        print("Applying normalisation mitigation (Perspective, human)...")
-        persp_human_norm = evaluate_perspective(norm_human_texts)
+            print("Evaluating Perspective API on human perturbed texts...")
+            persp_human = evaluate_perspective(human_texts)
 
-        print("Applying detection + fallback mitigation (Perspective, human)...")
-        persp_human_fallback = evaluate_perspective(fallback_human_texts)
+            print("Applying normalisation mitigation (Perspective, human)...")
+            persp_human_norm = evaluate_perspective(norm_human_texts)
 
-        print("Evaluating Perspective API on automated perturbed texts...")
-        persp_auto = evaluate_perspective(auto_texts)
+            print("Applying detection + fallback mitigation (Perspective, human)...")
+            persp_human_fallback = evaluate_perspective(fallback_human_texts)
 
-        print("Applying normalisation mitigation (Perspective, auto)...")
-        persp_auto_norm = evaluate_perspective(norm_auto_texts)
+            print("Evaluating Perspective API on automated perturbed texts...")
+            persp_auto = evaluate_perspective(auto_texts)
 
-        print("Applying detection + fallback mitigation (Perspective, auto)...")
-        persp_auto_fallback = evaluate_perspective(fallback_auto_texts)
+            print("Applying normalisation mitigation (Perspective, auto)...")
+            persp_auto_norm = evaluate_perspective(norm_auto_texts)
 
-        persp_results = {
-            "perspective_clean_norm": compare_toxicity_scores(persp_clean, persp_clean_norm),
-            "perspective_clean_fallback": compare_toxicity_scores(persp_clean, persp_clean_fallback),
-            "perspective_human_drop": compare_toxicity_scores(persp_clean, persp_human),
-            "perspective_human_norm": compare_toxicity_scores(persp_clean, persp_human_norm),
-            "perspective_human_fallback": compare_toxicity_scores(persp_clean, persp_human_fallback),
-            "perspective_auto_drop": compare_toxicity_scores(persp_clean, persp_auto),
-            "perspective_auto_norm": compare_toxicity_scores(persp_clean, persp_auto_norm),
-            "perspective_auto_fallback": compare_toxicity_scores(persp_clean, persp_auto_fallback),
-        }
+            print("Applying detection + fallback mitigation (Perspective, auto)...")
+            persp_auto_fallback = evaluate_perspective(fallback_auto_texts)
 
-    except Exception as e:
-        print(f"\n⚠️ Skipping Perspective API analysis due to error: {e}")
-        persp_results = {}
+            persp_results = {
+                "perspective_clean_norm": compare_toxicity_scores(persp_clean, persp_clean_norm),
+                "perspective_clean_fallback": compare_toxicity_scores(persp_clean, persp_clean_fallback),
+                "perspective_human_drop": compare_toxicity_scores(persp_clean, persp_human),
+                "perspective_human_norm": compare_toxicity_scores(persp_clean, persp_human_norm),
+                "perspective_human_fallback": compare_toxicity_scores(persp_clean, persp_human_fallback),
+                "perspective_auto_drop": compare_toxicity_scores(persp_clean, persp_auto),
+                "perspective_auto_norm": compare_toxicity_scores(persp_clean, persp_auto_norm),
+                "perspective_auto_fallback": compare_toxicity_scores(persp_clean, persp_auto_fallback),
+            }
+
+        except Exception as e:
+            print(f"\n⚠️ Skipping Perspective API analysis due to error: {e}")
+            persp_results = {}
 
     # Combine results
     print("\nComparing Detoxify results...")
