@@ -37,15 +37,11 @@ def compare_similarity(clean, human, auto):
         "min_similarity": [
             human_df["similarity"].min(),
             auto_df["similarity"].min(),
-<<<<<<< HEAD
         ],
         "max_similarity": [
             human_df["similarity"].max(),
             auto_df["similarity"].max(),
-        ],
-=======
         ]
->>>>>>> 8ee8d91 (improved automated attacks + made df spellcheck)
     })
 
     return human_df, auto_df, summary
