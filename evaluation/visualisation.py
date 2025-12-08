@@ -118,3 +118,25 @@ def plot_similarity_distributions(human_df, auto_df, save_path="similarity_boxpl
     plt.savefig(save_path)
     plt.show()
 
+
+def plot_levenshtein_box(results, save_path="levenshtein_boxplot.png"):
+    plt.figure(figsize=(10, 6))
+
+    all_df = []
+    for label, df in results.items():
+        temp = df.copy()
+        temp["type"] = label
+        all_df.append(temp)
+
+    full = pd.concat(all_df)
+
+    sns.boxplot(data=full, x="type", y="lev_distance")
+    plt.title("Levenshtein Distance Across Perturbation Types")
+    plt.xlabel("Perturbation Type")
+    plt.ylabel("Character-level Levenshtein Distance")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.show()
+
+

@@ -6,8 +6,8 @@ from mitigations.normalisation import normalise_text
 from mitigations.detection_fallback import detect_and_fallback
 from evaluation.results import compare_toxicity_scores
 from evaluation.label_changes import evaluate_label_changes
-from evaluation.analysis import compare_similarity
-from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes, plot_similarity_distributions
+from evaluation.analysis import compare_similarity, compute_levenshtein, summarise_levenshtein
+from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes, plot_similarity_distributions, plot_levenshtein_box
 from models.perspective import evaluate_perspective
 import pandas as pd
 
@@ -189,6 +189,40 @@ def main():
     print("\nSemantic similarity results:")
     print(summary)
     plot_similarity_distributions(human_df, auto_df, save_path="semantic_similarity_boxplot.png")
+
+    # Testing Levenshtein distance
+    print("\nCalculating Levenshtein distances...")
+
+    lev_human = compute_levenshtein(clean_texts, human_texts)
+    lev_auto = compute_levenshtein(clean_texts, auto_texts)
+    lev_human_norm = compute_levenshtein(clean_texts, norm_human_texts)
+    lev_auto_norm = compute_levenshtein(clean_texts, norm_auto_texts)
+    lev_human_fallback = compute_levenshtein(clean_texts, fallback_human_texts)
+    lev_auto_fallback = compute_levenshtein(clean_texts, fallback_auto_texts)
+
+    lev_summaries = [
+        summarise_levenshtein(lev_human, "human"),
+        summarise_levenshtein(lev_auto, "auto"),
+        summarise_levenshtein(lev_human_norm, "human_norm"),
+        summarise_levenshtein(lev_auto_norm, "auto_norm"),
+        summarise_levenshtein(lev_human_fallback, "human_fallback"),
+        summarise_levenshtein(lev_auto_fallback, "auto_fallback")
+    ]
+
+    print("\nLevenshtein distance summary:")
+    for item in lev_summaries:
+        print(item)
+
+    # Plot boxplot
+    plot_levenshtein_box({
+        "human": lev_human,
+        "auto": lev_auto,
+        "human_norm": lev_human_norm,
+        "auto_norm": lev_auto_norm,
+        "human_fallback": lev_human_fallback,
+        "auto_fallback": lev_auto_fallback
+    }, save_path="levenshtein_boxplot.png")
+
 
     print("\n✅ Experiment complete.")
 

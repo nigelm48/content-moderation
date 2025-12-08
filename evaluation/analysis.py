@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer, util
 import pandas as pd
+from Levenshtein import distance as levenshtein_distance
 
 
 model = SentenceTransformer("all-mpnet-base-v2")
@@ -46,3 +47,24 @@ def compare_similarity(clean, human, auto):
 
     return human_df, auto_df, summary
 
+def compute_levenshtein(clean_texts, perturbed_texts):
+    distances = [
+        levenshtein_distance(clean_texts[i], perturbed_texts[i])
+        for i in range(len(clean_texts))
+    ]
+
+    return pd.DataFrame({
+        "clean": clean_texts,
+        "perturbed": perturbed_texts,
+        "lev_distance": distances
+    })
+
+
+def summarise_levenshtein(df, label):
+    return {
+        "type": label,
+        "mean": df["lev_distance"].mean(),
+        "median": df["lev_distance"].median(),
+        "min": df["lev_distance"].min(),
+        "max": df["lev_distance"].max()
+    }
