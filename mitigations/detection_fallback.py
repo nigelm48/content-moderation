@@ -2,14 +2,12 @@ import re
 import numpy as np
 from textblob import TextBlob
 
-
 LEETSPEAK_MAP = {
     "0": "o", "1": "i", "3": "e", "4": "a",
     "5": "s", "7": "t", "@": "a", "$": "s"
 }
 
 def obfuscation_score(text):
-    """Quantifying obfuscation using character or structure anomalies"""
     if not text:
         return 0
 
@@ -21,7 +19,6 @@ def obfuscation_score(text):
 
     repetition = 1 if re.search(r"(.)\1{3,}", text_l) else 0
 
-    # whitespace fragmentation (e.g., 'h a t e')
     spaced = len(text_l.split())
     whitespace_frag = 1 if spaced >= len(text_l) / 2 else 0
 
@@ -41,7 +38,6 @@ def obfuscation_score(text):
 
 
 def soft_normalise(text):
-    """Basic normalisation to handle common obfuscations"""
     t = text.lower()
     for k, v in LEETSPEAK_MAP.items():
         t = t.replace(k, v)
@@ -50,11 +46,7 @@ def soft_normalise(text):
 
 
 def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=True):
-    """
-    1. soft-normalise (handle leetspeak, punctuation)
-    2. optionally apply spell correction
-    3. dynamic fallback based on obfuscation score
-    """
+
     first_pass_texts = []
     obfusc_scores = []
 
@@ -65,28 +57,45 @@ def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=Tru
         score = obfuscation_score(text)
         obfusc_scores.append(score)
 
-        norm_text = soft_normalise(text)
+        # First apply soft normalisation to clean text
+        cleaned = soft_normalise(text)
 
-        # only apply spell correction if obfuscation score is high
+        # Spell-correct only if obfuscation level is high
         if correct_spelling and score > threshold:
             try:
-                norm_text = str(TextBlob(norm_text).correct())
+                cleaned = str(TextBlob(cleaned).correct())
             except:
                 pass
 
-        first_pass_texts.append(norm_text)
+        first_pass_texts.append(cleaned)
 
+    
+    fallback_output = fallback_fn(first_pass_texts)
+
+    
+    if hasattr(fallback_output, "columns") and "toxicity" in fallback_output.columns:
+        prelim_scores = fallback_output["toxicity"].fillna(0).tolist()
+    else:
+        prelim_scores = [0] * len(first_pass_texts)
+
+    
     final_inputs = []
-    for original, norm, score in zip(texts, first_pass_texts, obfusc_scores):
+    for original, cleaned, score, conf in zip(texts, first_pass_texts, obfusc_scores, prelim_scores):
+        
         dynamic_threshold = threshold
+
+        
         if len(original) < 6:
             dynamic_threshold *= 0.7
+
+
         if len(original) > 50:
             dynamic_threshold *= 1.3
 
-        if score > dynamic_threshold:
-            final_inputs.append(norm)
+        
+        if score > dynamic_threshold and conf < 0.30:
+            final_inputs.append(cleaned)
         else:
-            final_inputs.append(original)
+            final_inputs.append(cleaned)
 
     return fallback_fn(final_inputs)
