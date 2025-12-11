@@ -63,7 +63,7 @@ def synonym_substitution(text):
 
 def automated_perturbation(texts, num_examples=50):
     """
-    Generates stronger and more diverse automated obfuscations.
+    Generates randomised automated obfuscations.
     """
     augmenter = WordNetAugmenter()
 
