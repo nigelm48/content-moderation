@@ -52,24 +52,36 @@ def plot_box(results_dict, metric="drop_values", save_path="results_box.png"):
     plt.show()
 
 
-def plot_scatter(results_dict_x, results_dict_y, metric="mean_drop", save_path="results_scatter.png"):
-    """
-    Scatter plot to compare perspective api vs detoxify.
-    """
-    x_vals, y_vals, labels = [], [], []
-    for name in results_dict_x:
-        if metric in results_dict_x[name].columns and name in results_dict_y:
-            x_vals.append(float(results_dict_x[name][metric].iloc[0]))
-            y_vals.append(float(results_dict_y[name][metric].iloc[0]))
-            labels.append(name)
-
+def plot_scatter(scores_x, scores_y, label_x="Model X", label_y="Model Y", save_path="results_scatter.png"):
     plt.figure(figsize=(8, 8))
-    plt.scatter(x_vals, y_vals)
-    for i, label in enumerate(labels):
-        plt.text(x_vals[i], y_vals[i], label)
-    plt.xlabel(f"{metric} (set X)")
-    plt.ylabel(f"{metric} (set Y)")
-    plt.title(f"Scatter plot comparing {metric} between two conditions")
+    
+    all_x, all_y, labels = [], [], []
+
+    for name in scores_x:
+        if name in scores_y:
+
+            x_vals = scores_x[name]["toxicity"].tolist()
+            y_vals = scores_y[name]["toxicity"].tolist()
+
+            
+            n = min(len(x_vals), len(y_vals))
+
+            all_x.extend(x_vals[:n])
+            all_y.extend(y_vals[:n])
+            labels.extend([name] * n)
+
+
+    df = pd.DataFrame({
+        "x": all_x,
+        "y": all_y,
+        "condition": labels
+    })
+
+    sns.scatterplot(data=df, x="x", y="y", hue="condition", alpha=0.6)
+
+    plt.xlabel(label_x)
+    plt.ylabel(label_y)
+    plt.title("Raw Toxicity Score Comparison")
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(save_path)

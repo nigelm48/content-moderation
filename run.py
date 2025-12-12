@@ -163,14 +163,6 @@ def main():
     print("\nGenerating label-change bar chart...")
     plot_label_changes(hx_results, save_path="HX_label_changes.png")
 
-    print("Generating scatter graph...")
-    plot_scatter(
-        results_dict_x=result_summary,
-        results_dict_y=persp_results,
-        metric="mean_drop",
-        save_path="results_scatter.png"
-    )
-
     print("Generating box plot...")
     # Box plot requires raw scores
     raw_scores = {
@@ -183,6 +175,24 @@ def main():
         "fallback_auto": fallback_auto_scores
     }
     plot_box(raw_scores, metric="toxicity", save_path="results_box.png")
+
+    print("Generating scatter chart to compare between detoxify and perspective...")
+    plot_scatter(
+        scores_x=raw_scores,
+        scores_y={
+            "clean": persp_clean,
+            "human": persp_human,
+            "auto": persp_auto,
+            "norm_human": persp_human_norm,
+            "fallback_human": persp_human_fallback,
+            "norm_auto": persp_auto_norm,
+            "fallback_auto": persp_auto_fallback,
+        },
+        label_x="Detoxify Toxicity Score",
+        label_y="Perspective Toxicity Score",
+        save_path="results_scatter.png"
+    )
+
 
     # Testing semantic similarity
     human_df, auto_df, summary = compare_similarity(clean_texts, human_texts, auto_texts)
