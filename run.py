@@ -6,8 +6,8 @@ from mitigations.normalisation import normalise_text
 from mitigations.detection_fallback import detect_and_fallback
 from evaluation.results import compare_toxicity_scores
 from evaluation.label_changes import evaluate_label_changes
-from evaluation.analysis import compare_similarity, compute_levenshtein, summarise_levenshtein
-from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes, plot_similarity_distributions, plot_levenshtein_box
+from evaluation.analysis import compare_similarity, compute_levenshtein, summarise_levenshtein, compute_readability, summarise_readability
+from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes, plot_similarity_distributions, plot_levenshtein_box, plot_readability_box
 from models.perspective import evaluate_perspective
 import pandas as pd
 
@@ -138,7 +138,7 @@ def main():
             print(f"\n⚠️ Skipping Perspective API analysis due to error: {e}")
             persp_results = {}
 
-    # Combine results
+    # Combining the results
     print("\nComparing Detoxify results...")
     result_summary = {
         "human_drop": compare_toxicity_scores(clean_scores, human_scores),
@@ -232,6 +232,41 @@ def main():
         "human_fallback": lev_human_fallback,
         "auto_fallback": lev_auto_fallback
     }, save_path="levenshtein_boxplot.png")
+
+    # Flesch Reading Ease Tests
+    print("\nCalculating the change in Flesch Reading Ease scores...")
+
+    flesch_human = compute_readability(clean_texts, human_texts)
+    flesch_auto = compute_readability(clean_texts, auto_texts)
+    flesch_human_norm = compute_readability(clean_texts, norm_human_texts)
+    flesch_auto_norm = compute_readability(clean_texts, norm_auto_texts)
+    flesch_human_fallback = compute_readability(clean_texts, fallback_human_texts)
+    flesch_auto_fallback = compute_readability(clean_texts, fallback_auto_texts)
+
+    flesch_results = {
+        "human": flesch_human,
+        "auto": flesch_auto,
+        "human_norm": flesch_human_norm,
+        "auto_norm": flesch_auto_norm,
+        "human_fallback": flesch_human_fallback,
+        "auto_fallback": flesch_auto_fallback
+    }
+
+    flesch_summaries = [
+        summarise_readability(flesch_human, "human"),
+        summarise_readability(flesch_auto, "auto"),
+        summarise_readability(flesch_human_norm, "human_norm"),
+        summarise_readability(flesch_auto_norm, "auto_norm"),
+        summarise_readability(flesch_human_fallback, "human_fallback"),
+        summarise_readability(flesch_auto_fallback, "auto_fallback"),
+    ]
+
+    print("\nFlesch Reading Ease change summary:")
+    for item in flesch_summaries:
+        print(item)
+
+    plot_readability_box(flesch_results, save_path="flesch_change_boxplot.png")
+
 
 
     print("\n✅ Experiment complete.")

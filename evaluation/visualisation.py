@@ -151,4 +151,26 @@ def plot_levenshtein_box(results, save_path="levenshtein_boxplot.png"):
     plt.savefig(save_path)
     plt.show()
 
+def plot_readability_box(results, save_path="flesch_change_boxplot.png"):
+    plt.figure(figsize=(10, 6))
+
+    all_df = []
+    for label, df in results.items():
+        temp = df.copy()
+        temp["type"] = label
+        all_df.append(temp)
+
+    full = pd.concat(all_df)
+
+    sns.boxplot(data=full, x="type", y="flesch_change")
+    plt.title("Flesch Reading Ease Change Across Conditions")
+    plt.xlabel("Perturbation Type")
+    plt.ylabel("Change in Flesch Score (perturbed - clean)")
+    plt.axhline(0, linestyle="--")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.show()
+
+
 
