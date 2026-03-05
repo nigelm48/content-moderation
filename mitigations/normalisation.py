@@ -8,9 +8,9 @@ def normalise_text(text):
     text = text.lower()
     text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
     text = text.translate(translation)
-    text = re.sub(r'(.)\1{2,}', r'\1\1', text)  # collapse repeated letters
-    text = re.sub(r'[^a-z\s]', '', text)       # remove punctuation
-    text = re.sub(r'\s+', ' ', text)          # fix extra spaces
+    text = re.sub(r'(.)\1{2,}', r'\1\1', text)
+    text = re.sub(r'[^a-z\s]', '', text)
+    text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
 if __name__ == "__main__":

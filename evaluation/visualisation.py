@@ -3,9 +3,6 @@ import pandas as pd
 import seaborn as sns
 
 def plot_bar(results_dict, metric="mean_drop", save_path="results_bar.png"):
-    """
-    Bar chart showing mean drop in toxicity scores across different conditions.
-    """
     labels, means = [], []
     for name, df in results_dict.items():
         if metric in df.columns:
@@ -14,7 +11,7 @@ def plot_bar(results_dict, metric="mean_drop", save_path="results_bar.png"):
 
     plt.figure(figsize=(12, 6))
     bars = plt.bar(labels, means, color='skyblue')
-    plt.ylabel(f'{metric} (clean - perturbed)')
+    plt.ylabel(f'{metric} (unperturbed - perturbed)')
     plt.title('Mean drop in toxicity score by condition')
     plt.xticks(rotation=30, ha='right')
 
@@ -29,9 +26,6 @@ def plot_bar(results_dict, metric="mean_drop", save_path="results_bar.png"):
 
 
 def plot_box(results_dict, metric="drop_values", save_path="results_box.png"):
-    """
-    Boxplot showing distribution of drops.
-    """
     all_data = []
     for name, df in results_dict.items():
         if metric in df.columns:
@@ -165,7 +159,7 @@ def plot_readability_box(results, save_path="flesch_change_boxplot.png"):
     sns.boxplot(data=full, x="type", y="flesch_change")
     plt.title("Flesch Reading Ease Change Across Conditions")
     plt.xlabel("Perturbation Type")
-    plt.ylabel("Change in Flesch Score (perturbed - clean)")
+    plt.ylabel("Change in Flesch Score (perturbed - unperturbed)")
     plt.axhline(0, linestyle="--")
     plt.xticks(rotation=45)
     plt.tight_layout()

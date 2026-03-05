@@ -3,7 +3,6 @@ import random
 import unicodedata
 import numpy as np
 
-# Homoglyph and leetspeak mappings
 HOMOGLYPHS = {
     "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
     "A": "A", "E": "E", "O": "O", "P": "P", "C": "C"
@@ -19,25 +18,22 @@ def random_char_noise(text):
         return text
     i = random.randint(0, len(text) - 1)
     ops = [
-        text[:i] + text[i]*2 + text[i+1:],             # duplication
-        text[:i] + "" + text[i+1:],                    # deletion
-        text[:i] + random.choice("!?.*") + text[i:],   # insertion
+        text[:i] + text[i]*2 + text[i+1:],
+        text[:i] + "" + text[i+1:],
+        text[:i] + random.choice("!?.*") + text[i:],
     ]
     return random.choice(ops)
 
 
 def homoglyph_attack(text):
-    """Replace characters with Unicode lookalikes."""
     return "".join(HOMOGLYPHS.get(c, c) for c in text)
 
 
 def leetspeak(text):
-    """Replace letters with numbers/symbols."""
     return "".join(LEET_MAP.get(c.lower(), c) for c in text)
 
 
 def random_spacing(text):
-    """Insert random spaces inside words."""
     return "".join(c + (" " if random.random() < 0.15 else "") for c in text)
 
 
@@ -46,7 +42,6 @@ def random_casing(text):
 
 
 def punctuation_injection(text):
-    """Add random punctuation breaks."""
     punct = ["*", "-", "~", ".", "!", "…"]
     return "".join(c + (random.choice(punct) if random.random() < 0.1 else "") for c in text)
 
@@ -62,9 +57,6 @@ def synonym_substitution(text):
 
 
 def automated_perturbation(texts, num_examples=50):
-    """
-    Generates randomised automated obfuscations.
-    """
     augmenter = WordNetAugmenter()
 
     attacks = [
@@ -88,7 +80,7 @@ def automated_perturbation(texts, num_examples=50):
         try:
             out = attack(t)
         except Exception:
-            out = t  # if there's an error, do nothing
+            out = t
 
         perturbed.append(out)
 

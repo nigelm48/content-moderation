@@ -57,10 +57,8 @@ def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=Tru
         score = obfuscation_score(text)
         obfusc_scores.append(score)
 
-        # First apply soft normalisation to clean text
         cleaned = soft_normalise(text)
 
-        # Spell-correct only if obfuscation level is high
         if correct_spelling and score > threshold:
             try:
                 cleaned = str(TextBlob(cleaned).correct())

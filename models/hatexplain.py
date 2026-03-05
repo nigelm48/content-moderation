@@ -12,9 +12,6 @@ model = AutoModelForSequenceClassification.from_pretrained("Hate-speech-CNERG/be
 model.eval()
 
 def hatexplain(texts):
-    """
-    Runs HateXplain on a list of texts and returns LABELS ONLY.
-    """
     labels = []
     for text in texts:
         inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=False)
