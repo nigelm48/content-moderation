@@ -163,19 +163,36 @@ def main():
     print("Generating box plot...")
 
     raw_scores = {
-        "unperturbed": clean_scores,
-        "human": human_scores,
-        "auto": auto_scores,
-        "human_norm": human_norm_scores,
-        "human_fallback": human_fallback_scores,
-        "auto_norm": auto_norm_scores,
-        "auto_fallback": auto_fallback_scores
+        "detoxify_unperturbed": clean_scores,
+        "detoxify_human": human_scores,
+        "detoxify_auto": auto_scores,
+        "detoxify_human_norm": human_norm_scores,
+        "detoxify_human_fallback": human_fallback_scores,
+        "detoxify_auto_norm": auto_norm_scores,
+        "detoxify_auto_fallback": auto_fallback_scores,
+
+        "perspective_unperturbed": persp_clean if PERSPECTIVE else None,
+        "perspective_human": persp_human if PERSPECTIVE else None,
+        "perspective_auto": persp_auto if PERSPECTIVE else None,
+        "perspective_human_norm": persp_human_norm if PERSPECTIVE else None,
+        "perspective_human_fallback": persp_human_fallback if PERSPECTIVE else None,
+        "perspective_auto_norm": persp_auto_norm if PERSPECTIVE else None,
+        "perspective_auto_fallback": persp_auto_fallback if PERSPECTIVE else None,
     }
+
     plot_box(raw_scores, metric="toxicity", save_path="results_box.png")
 
     print("Generating scatter chart to compare between detoxify and perspective...")
     plot_scatter(
-        scores_x=raw_scores,
+        scores_x={
+            "unperturbed": clean_scores,
+            "human": human_scores,
+            "auto": auto_scores,
+            "human_norm": human_norm_scores,
+            "human_fallback": human_fallback_scores,
+            "auto_norm": auto_norm_scores,
+            "auto_fallback": auto_fallback_scores,
+        },
         scores_y={
             "unperturbed": persp_clean,
             "human": persp_human,
