@@ -90,10 +90,6 @@ def detect_and_fallback(texts, fallback_fn, threshold=0.35, correct_spelling=Tru
         if len(original) > 50:
             dynamic_threshold *= 1.3
 
-        
-        if score > dynamic_threshold and conf < 0.30:
-            final_inputs.append(cleaned)
-        else:
-            final_inputs.append(cleaned)
+        final_inputs.append(cleaned)
 
     return fallback_fn(final_inputs)
