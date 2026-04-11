@@ -3,6 +3,7 @@ import pandas as pd
 
 def load_noisyhate():
 
+    # Some of the initial loading code is adapted from the original NoisyHate paper, which can be found here: https://arxiv.org/pdf/2303.10430
     dataset = load_dataset("NoisyHate/Noisy_Hate_Data")
 
     print("Available splits:", dataset.keys())
