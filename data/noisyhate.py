@@ -26,8 +26,3 @@ def load_noisyhate():
         print("Columns:", df.columns.tolist())
         print(df.head())
         return df
-
-
-if __name__ == "__main__":
-    df = load_noisyhate()
-    print(f"\n✅ Dataset loaded successfully with {len(df)} rows.")

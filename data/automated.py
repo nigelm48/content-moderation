@@ -1,7 +1,5 @@
 from textattack.augmentation import WordNetAugmenter
 import random
-import unicodedata
-import numpy as np
 
 HOMOGLYPHS = {
     "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
@@ -85,11 +83,3 @@ def automated_perturbation(texts, num_examples=50):
         perturbed.append(out)
 
     return perturbed
-
-
-
-if __name__ == "__main__":
-    sample_texts = ["I hate you", "You're so dumb", "Go away"]
-    perturbed = automated_perturbation(sample_texts)
-    for p in perturbed:
-        print(p)

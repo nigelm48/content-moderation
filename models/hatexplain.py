@@ -20,15 +20,3 @@ def hatexplain(texts):
         preds = torch.argmax(outputs.logits, dim=1).item()
         labels.append(LABEL_MAP[preds])
     return labels
-
-if __name__ == "__main__":
-    sample_texts = [
-        "I hate you",
-        "Have a nice day!",
-        "how are you?",
-        "You're so dumb",
-        "what's wrong with you? you idiot"
-    ]
-    predictions = hatexplain(sample_texts)
-    for text, label in zip(sample_texts, predictions):
-        print(f"Text: {text} | Predicted Label: {label}")

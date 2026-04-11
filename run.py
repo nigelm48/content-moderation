@@ -283,7 +283,7 @@ def main():
 
 
 
-    print("\n✅ Experiment complete.")
+    print("\nExperiment complete.")
 
 if __name__ == "__main__":
     main()

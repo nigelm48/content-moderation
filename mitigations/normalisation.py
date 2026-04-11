@@ -12,6 +12,3 @@ def normalise_text(text):
     text = re.sub(r'[^a-z\s]', '', text)
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
-
-if __name__ == "__main__":
-    print(normalise_text("H@t3 sp33ch!!! sooo b4d!!!"))
