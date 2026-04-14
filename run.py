@@ -33,7 +33,7 @@ def main():
     human_scores = evaluate_toxicity(human_texts)
 
     print("Generating and evaluating detoxify on automated perturbations...")
-    auto_texts = automated_perturbation(clean_texts, num_examples=len(clean_texts))
+    auto_texts = automated_perturbation(clean_texts)
     auto_texts = [str(t) if t is not None else "" for t in auto_texts]
     auto_scores = evaluate_toxicity(auto_texts)
 

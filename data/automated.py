@@ -1,13 +1,9 @@
 from textattack.augmentation import WordNetAugmenter
 import random
 
-HOMOGLYPHS = {
-    "a": "а", "e": "е", "o": "о","c": "с","p": "р","x": "х","y": "у","i": "і","s": "ѕ","h": "һ"
-}
+HOMOGLYPHS = {"a": "а", "e": "е", "o": "о", "c": "с", "p": "р", "x": "х", "y": "у", "i": "і", "s": "ѕ", "h": "һ"}
 
-LEET_MAP = {
-    "a": "4", "e": "3", "i": "1", "o": "0", "s": "5", "t": "7"
-}
+LEET_MAP = {"a": "4", "e": "3", "i": "1", "o": "0", "s": "5", "t": "7"}
 
 
 def random_char_noise(text):
@@ -53,7 +49,7 @@ def synonym_substitution(text):
     return text
 
 
-def automated_perturbation(texts, num_examples=50):
+def automated_perturbation(texts):
 
     attacks = [
         synonym_substitution,
@@ -66,7 +62,7 @@ def automated_perturbation(texts, num_examples=50):
     ]
 
     perturbed = []
-    for t in texts[:num_examples]:
+    for t in texts:
         if not t:
             perturbed.append("")
             continue

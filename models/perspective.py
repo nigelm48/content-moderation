@@ -54,8 +54,3 @@ def evaluate_perspective(texts):
         requests_this_minute += 1
 
     return pd.DataFrame({"toxicity": scores})
-
-
-if __name__ == "__main__":
-    example = ["I hate you", "Have a nice day!", "I hate you"]
-    print(evaluate_perspective(example))
