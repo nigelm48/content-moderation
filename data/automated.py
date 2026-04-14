@@ -1,8 +1,6 @@
 from textattack.augmentation import WordNetAugmenter
 import random
 
-HOMOGLYPHS = {"a": "а", "e": "е", "o": "о", "c": "с", "p": "р", "x": "х", "y": "у", "i": "і", "s": "ѕ", "h": "һ"}
-
 LEET_MAP = {"a": "4", "e": "3", "i": "1", "o": "0", "s": "5", "t": "7"}
 
 
@@ -16,10 +14,6 @@ def random_char_noise(text):
         text[:i] + random.choice("!?.*") + text[i:],
     ]
     return random.choice(ops)
-
-
-def homoglyph_attack(text):
-    return "".join(HOMOGLYPHS.get(c, c) for c in text)
 
 
 def leetspeak(text):
@@ -54,7 +48,6 @@ def automated_perturbation(texts):
     attacks = [
         synonym_substitution,
         random_char_noise,
-        homoglyph_attack,
         leetspeak,
         random_spacing,
         random_casing,
