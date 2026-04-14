@@ -2,8 +2,7 @@ from textattack.augmentation import WordNetAugmenter
 import random
 
 HOMOGLYPHS = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
-    "A": "A", "E": "E", "O": "O", "P": "P", "C": "C"
+    "a": "а", "e": "е", "o": "о","c": "с","p": "р","x": "х","y": "у","i": "і","s": "ѕ","h": "һ"
 }
 
 LEET_MAP = {
@@ -55,10 +54,8 @@ def synonym_substitution(text):
 
 
 def automated_perturbation(texts, num_examples=50):
-    augmenter = WordNetAugmenter()
 
     attacks = [
-        lambda x: augmenter.augment(x)[0],
         synonym_substitution,
         random_char_noise,
         homoglyph_attack,

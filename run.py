@@ -9,7 +9,6 @@ from evaluation.label_changes import evaluate_label_changes
 from evaluation.analysis import compare_similarity, compute_levenshtein, summarise_levenshtein, compute_readability, summarise_readability
 from evaluation.visualisation import plot_bar, plot_scatter, plot_box, plot_label_changes, plot_similarity_distributions, plot_levenshtein_box, plot_readability_box
 from models.perspective import evaluate_perspective
-import pandas as pd
 
 def main():
     print("Loading dataset...")
