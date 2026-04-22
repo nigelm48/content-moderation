@@ -89,51 +89,49 @@ def main():
     }
 
     # Perspective API
-    PERSPECTIVE = True
+    try:
+        print("\nEvaluating Perspective API on clean texts...")
+        persp_clean = evaluate_perspective(clean_texts)
 
-    if PERSPECTIVE:
-        try:
-            print("\nEvaluating Perspective API on clean texts...")
-            persp_clean = evaluate_perspective(clean_texts)
+        print("Evaluating normalisation on unperturbed texts with Perspective API...")
+        persp_clean_norm = evaluate_perspective(clean_norm_texts)
 
-            print("Evaluating normalisation on unperturbed texts with Perspective API...")
-            persp_clean_norm = evaluate_perspective(clean_norm_texts)
+        print("Evaluating detection + spellcheck mitigation on unperturbed texts with Perspective API...")
+        persp_clean_spellcheck = evaluate_perspective(clean_spellcheck_texts)
 
-            print("Evaluating detection + spellcheck mitigation on unperturbed texts with Perspective API...")
-            persp_clean_spellcheck = evaluate_perspective(clean_spellcheck_texts)
+        print("Evaluating Perspective API on human perturbed texts...")
+        persp_human = evaluate_perspective(human_texts)
 
-            print("Evaluating Perspective API on human perturbed texts...")
-            persp_human = evaluate_perspective(human_texts)
+        print("Evaluating normalisation on human perturbed texts with Perspective API...")
+        persp_human_norm = evaluate_perspective(human_norm_texts)
 
-            print("Evaluating normalisation on human perturbed texts with Perspective API...")
-            persp_human_norm = evaluate_perspective(human_norm_texts)
+        print("Evaluating detection + spellcheck mitigation on human perturbed texts with Perspective API...")
+        persp_human_spellcheck = evaluate_perspective(human_spellcheck_texts)
 
-            print("Evaluating detection + spellcheck mitigation on human perturbed texts with Perspective API...")
-            persp_human_spellcheck = evaluate_perspective(human_spellcheck_texts)
+        print("Evaluating Perspective API on automated perturbed texts...")
+        persp_auto = evaluate_perspective(auto_texts)
 
-            print("Evaluating Perspective API on automated perturbed texts...")
-            persp_auto = evaluate_perspective(auto_texts)
+        print("Evaluating normalisation on automated perturbations with Perspective API...")
+        persp_auto_norm = evaluate_perspective(auto_norm_texts)
 
-            print("Evaluating normalisation on automated perturbations with Perspective API...")
-            persp_auto_norm = evaluate_perspective(auto_norm_texts)
+        print("Evaluating detection + spellcheck mitigation on automated perturbations with Perspective API...")
+        persp_auto_spellcheck = evaluate_perspective(auto_spellcheck_texts)
 
-            print("Evaluating detection + spellcheck mitigation on automated perturbations with Perspective API...")
-            persp_auto_spellcheck = evaluate_perspective(auto_spellcheck_texts)
+        persp_results = {
+            "perspective_human_drop": compare_toxicity_scores(persp_clean, persp_human),
+            "perspective_auto_drop": compare_toxicity_scores(persp_clean, persp_auto),
+            "perspective_unperturbed_norm": compare_toxicity_scores(persp_clean, persp_clean_norm),
+            "perspective_unperturbed_spellcheck": compare_toxicity_scores(persp_clean, persp_clean_spellcheck),
+            "perspective_human_norm": compare_toxicity_scores(persp_clean, persp_human_norm),
+            "perspective_human_spellcheck": compare_toxicity_scores(persp_clean, persp_human_spellcheck),
+            "perspective_auto_norm": compare_toxicity_scores(persp_clean, persp_auto_norm),
+            "perspective_auto_spellcheck": compare_toxicity_scores(persp_clean, persp_auto_spellcheck),
+        }
 
-            persp_results = {
-                "perspective_human_drop": compare_toxicity_scores(persp_clean, persp_human),
-                "perspective_auto_drop": compare_toxicity_scores(persp_clean, persp_auto),
-                "perspective_unperturbed_norm": compare_toxicity_scores(persp_clean, persp_clean_norm),
-                "perspective_unperturbed_spellcheck": compare_toxicity_scores(persp_clean, persp_clean_spellcheck),
-                "perspective_human_norm": compare_toxicity_scores(persp_clean, persp_human_norm),
-                "perspective_human_spellcheck": compare_toxicity_scores(persp_clean, persp_human_spellcheck),
-                "perspective_auto_norm": compare_toxicity_scores(persp_clean, persp_auto_norm),
-                "perspective_auto_spellcheck": compare_toxicity_scores(persp_clean, persp_auto_spellcheck),
-            }
-
-        except Exception as e:
-            print(f"\n⚠️ Skipping Perspective API analysis due to error: {e}")
-            persp_results = {}
+    except Exception as e:
+        raise RuntimeError(
+            "Perspective API evaluation has failed. Please make sure that the API key is set correctly in the .env file and that you have an active internet connection."
+        ) from e
 
     print("\nComparing Detoxify results...")
     result_summary = {
@@ -170,13 +168,13 @@ def main():
         "detoxify_auto_norm": auto_norm_scores,
         "detoxify_auto_spellcheck": auto_spellcheck_scores,
 
-        "perspective_unperturbed": persp_clean if PERSPECTIVE else None,
-        "perspective_human": persp_human if PERSPECTIVE else None,
-        "perspective_auto": persp_auto if PERSPECTIVE else None,
-        "perspective_human_norm": persp_human_norm if PERSPECTIVE else None,
-        "perspective_human_spellcheck": persp_human_spellcheck if PERSPECTIVE else None,
-        "perspective_auto_norm": persp_auto_norm if PERSPECTIVE else None,
-        "perspective_auto_spellcheck": persp_auto_spellcheck if PERSPECTIVE else None,
+        "perspective_unperturbed": persp_clean,
+        "perspective_human": persp_human,
+        "perspective_auto": persp_auto,
+        "perspective_human_norm": persp_human_norm,
+        "perspective_human_spellcheck": persp_human_spellcheck,
+        "perspective_auto_norm": persp_auto_norm,
+        "perspective_auto_spellcheck": persp_auto_spellcheck,
     }
 
     plot_box(raw_scores, metric="toxicity", save_path="results_box.png")
