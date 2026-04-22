@@ -7,6 +7,8 @@ LABEL_MAP = {
     2: "offensive"
 }
 
+# Initial loading code was used from the Hugging face repo: https://huggingface.co/Hate-speech-CNERG/bert-base-uncased-hatexplain?text=get+out&library=transformers
+
 tokenizer = AutoTokenizer.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain")
 model = AutoModelForSequenceClassification.from_pretrained("Hate-speech-CNERG/bert-base-uncased-hatexplain")
 model.eval()
