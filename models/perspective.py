@@ -33,7 +33,7 @@ def evaluate_perspective(texts):
             requests_this_minute = 0
             minute_start = time.time()
 
-        if requests_this_minute >= 50:
+        if requests_this_minute >= 45:
             sleep_time = 60 - (time.time() - minute_start)
             print(f"[INFO] Throttling: sleeping {sleep_time:.1f}s to avoid rate limits...")
             time.sleep(sleep_time)
