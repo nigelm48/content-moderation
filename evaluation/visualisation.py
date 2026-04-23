@@ -25,7 +25,7 @@ def plot_bar(results_dict, metric="mean_drop", save_path="results_bar.png"):
     plt.show()
 
 
-def plot_box(results_dict, metric="drop_values", save_path="results_box.png"):
+def plot_box(results_dict, metric="toxicity", save_path="results_box.png"):
     all_data = []
     for name, df in results_dict.items():
         if metric in df.columns:
@@ -83,7 +83,7 @@ def plot_scatter(scores_x, scores_y, label_x="Model X", label_y="Model Y", save_
 
 
 
-def plot_label_changes(results_dict, save_path="label_changes.png"):
+def plot_label_changes(results_dict, save_path="HX_label_changes.png"):
 
     rows = []
     for name, df in results_dict.items():
@@ -110,7 +110,7 @@ def plot_label_changes(results_dict, save_path="label_changes.png"):
     plt.savefig(save_path)
     plt.show()
     
-def plot_similarity_distributions(human_df, auto_df, save_path="similarity_boxplot.png"):
+def plot_similarity_distributions(human_df, auto_df, save_path="semantic_similarity_boxplot.png"):
     human_df["type"] = "human"
     auto_df["type"] = "automated"
 
