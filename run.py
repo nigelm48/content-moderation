@@ -146,7 +146,7 @@ def main():
         **persp_results
     }
 
-    # Print results
+    # Printing the results
     for k, v in result_summary.items():
         print(f"\n{k}:\n{v}")
 
@@ -234,7 +234,6 @@ def main():
     for item in lev_summaries:
         print(item)
 
-    # Plot boxplot
     plot_levenshtein_box({
         "human": lev_human,
         "auto": lev_auto,
